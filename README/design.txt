@@ -1,0 +1,116 @@
+Welcome to SmartMUN!
+
+
+HTML Templates
+    Using PageDraw
+        To help generate my HTML I decided to use Pagedraw (PD). My personal belief is that most HTML is not
+        actual programming (since HTML is not a programming language) and so I wanted to focus on the design
+        and asthetics of my webpages. Additionally, I was able to help my friend (who helped to create PD)
+        to test his program. For this reason, my template's code may seem a bit cryptic at first (because 
+        of the "pd" that appears everywhere). It is also for this reason that the CSS code is on the same
+        document as the HTML code. Had I written these myself, I would separate the two but, considering
+        PD overwrites changes I make to the template documents (since I have an active sync between my IDE and
+        PD, these changes would not matter). I also do not wish to disable the sync as it allows me to seemlessly
+        alter my website's asthetics with little hassel. 
+    
+        Using PD did not exempt me completely from writing some HTML. I needed to use Jinja codes to allow 
+        my tables to display dynamic content from my server. Additionally, I had to request to the creators of
+        PD a way for me to add tags to HTML elements (the version of PD did not allow that at the timee, making
+        it impossible to have "id" and other tags) so that I could use these when developing my JavaScript for
+        SmartMUN. I also found myself using custom code (which PD supports) to create things like a better checkbox,
+        to call JavaScript functions, etc.
+        
+        The most notable template is "error.html" as it is likely the one that appears the most frequently in my
+        Python code. It is the screen the user will see should any user error apper in the backend. It may not
+        appear as frequently with JavaScript on, as it serves mostly for form validation in the unlikely event a
+        user turns off their Javascript.
+
+
+JavaScript
+    speakersList.js
+        These scripts enable me to control the speakers list. The "startTimer" function is what controls and
+        displays my timer, while the "updateSpeakingTime" function is called whenever the user presses the
+        "Start Timer" button. The reason the "firstSpeaker" variable is necessary is that, without it, the
+        first speaker would be skipped without his/her speech being timed (as "nextSpeaker" would be called).
+        The "updateSpeakingTime" function also causes someone's speaking time to begin, so I use AJAX to update
+        my database via a link defined in my Python/backend code so that the current speaker's speech count is
+        increased by one. The "addSpeaker" function adds a speaker to the list. The "writeSpeakerList" function
+        simply modifies the page's HTML so that the speakers list is displayed. The "clearSpeakersList" function
+        clears the array "speakers".
+        
+    forms.js
+        These scripts are called for the login and registration pages. The "delOptions" verifies if the checkboxes
+        in these forms are checked, which indicates the user is a delegate. It hence modifies the visibility of
+        the delegate inputs so that these can be filled. The "requiredInput" function notifies the user that that
+        field is a required field. The "changeVisibility" function is what actually modifies the visibility of a 
+        field. The "checkMatch" function checks if two fields have the same input. I chose not to use the Bootstrap
+        library because it seemed to interfere with Pagedraw.
+
+Python
+    Application.py
+        I used Flask to run the server for my website at it allows me to code relatively easily and 
+        also is nicely integrated with the CS50 IDE. Since multiple HTML pages use the stats on majority
+        requirements, I decided to factor out these calculations as a function ("updateReqs"). To be able to
+        manipulate the same variables across functions, I declared them as session variables (as just declaring
+        them as global variables would have them reset when they weren't supposed to since the code was being
+        looped continuously due to Flask). I also found that I was repeating very similar code which has the
+        purpose of updating a delegation's participation stats. So, I created the "updateDelInfo" to be able
+        to factor out this operation.
+
+        The "login" function is fairly standard and handles potential errors and form validation in case the
+        user disables JavaScript on their browser. It also detects whether the delegate information checkbox
+        is checked so that it may run the appropriate code (since committee managers and delegates require
+        different codes due to how the database is set up - see more in the "SQL" section). The "logout" 
+        function is also pretty straightforward. 
+
+        The "register" function also handles form validation and manipulates our database differently based on
+        whether the delegate options checkbox is checked. For more on my database, see the "SQL" 
+        paragraphs further below. The "resetpass" function is fairly standard as well.  In addition to form
+        validation, it chooses the appropriate table to modify and changes the user's hash. I decided to have
+        a text appear that notifies the user of the successful change.
+
+        The "manager" function does the majority of the database manipulation. It is here that I chose to
+        update most of the participation stats and where "updateDelInfo" is most used. The "manager"
+        function does the necessary form validation and then modifies the database accordingly, checking
+        which fields are empty and which aren't (and hence should be updated). This design choice allowed me
+        to have a single, multi-purpose form on the manager.html template. Since I parse a string of comma
+        separated values (with a function in Helpers.py), the user is also able to add, delete, or modify
+        multiple countries's stats at once.
+
+        The "crisis" function so far doesn't do much. I plan to expand it during J-term so that delegates
+        can send messages to each other and to the committee manager.
+
+        The "quickup" function is basically what enables the "QuickUp" feature, whereby you can click on
+        a value in the table in the "manager" page and it will automatically increase that value by one. I
+        wanted to have this feature so that committee managers could quickly make this small (and frequent)
+        change to participation stats. Again, "updateDelInfo" is called quite a bit.
+    
+    Helpers.py
+        I wanted to put all my non-database manipulating functions in a separate file from "application.py"
+        to improve its readibility. The "login_required" function is the same as that for CS50 Finance and 
+        simply ensures that some pages are only available if a user is signed in. The commLogin function is
+        a slight variation of this previous function, ensuring specifically that a committee is logged in. I
+        needed to differentiate between the two so that delegates cannot access committee manager pages while
+        they are logged in. I tried merging these two functions into a single one that would take in a few
+        parameters, but that ended up breaking my code and I was unable to find resources that would fix this,
+        so I maintained them separate. The "isInt" function simply ensures a string can be converted to an
+        integer and is used for form validation. The "commaStringParse" function takes as input a string of 
+        comma separated values and parses it, returning a list with each value as an element.
+
+
+SQL
+    My SQL database has one central table for all the committee managers, called "users".  Each row has an ID,
+    a username, password hash, and a number of members in the committee. The first three rows are fairly straight
+    forward, but the last one's purpose may not be so evident. It is used to display the committee stats and
+    majorities (20%, simpliefed majority, qualified majority, etc).
+
+    When a committee is created, another table for that committee is also created. For simplicity's sake, each
+    table is simply called "commID" where ID is the ID for that committee in the "users" table. In each
+    committee's table there is a list of all members and the statistics about each one's participation. The
+    most interesting column here is likely that of "hash". It will by default be NULL until the delegation 
+    registers with the program. Our Python code won't allow anyone to sign in without registering first. Once
+    they have, the hash is stored and they can login again in the future.
+
+    I'm using SQLite because I expect the database to be fairly small (at least for now) and it was most
+    convenient considering it is nicely integrated with the CS50 IDE. This in turn allowed me to better test
+    my code and see my database being manipulated.

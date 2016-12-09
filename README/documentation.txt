@@ -1,0 +1,138 @@
+Welcome to SmartMUN!
+
+Getting Started:
+        To access the site, we first need to start up our server. Head over to the CS50 IDE and open 
+        up a terminal. Change directories to the "SmartMUN" folder, install the necessary dependencies
+        by running "pip3 install --user -r requirements.txt", and run Flask as per
+        "flask run". Now, head over to the "CS50 IDE" button on the top left and click it, selecting
+        "Web Server" from the drop-down menu. You should now be redirected to our SmartMUN's log-in 
+        page and are ready to start using SmartMUN.
+
+
+Committee Moderator Mode
+
+    Registering
+        You should create an account on SmartMUN as a committee (since we're still working on the cool,
+        new features for delegates). To register, simply click on the text to the right of the form (and
+        says "Register Here"). Great! Now go ahead and create a committee name and password. If all fields
+        are filled out properly, you should have been redirected to the log-in page you saw before. Let's
+        log-in and explore all that SmartMUN has to offer.
+        
+    Manager
+        You should now be looking at a page that contains a table with all kinds of important MUN stats
+        (i.e. Speeches, Resolutions, Amendments, Attended Sessions, and Majorities). Hum... it doesn't 
+        look too exciting though. It seems like we have no delegations in our committees! Let's add a few.
+        
+        See the blue form on the bottom right? As per the instructions on that form, add "USA" by typing 
+        in "USA" to the "Delegation Name" field and leaving the other fields blank. Hit the button "Update"
+        and viola! You should now see the USA has been added and a few statistics should have appeared and/or
+        changed. Let's go ahead and add the current members of the United Nations Security Council (in 2016)
+        by repeating this process!  They are: China, UK, France, Russia, Angola, Egypt, Japan, Malaysia, 
+        New Zealand, Senegals, Spain, Ukraine, Uruguay, and Venezuela. You can add multiple countries at once
+        by separating them with commas and putting them in the "Delegation Name" field. Note hat you can also
+        edit multiple countries' stats at once by following this same process. So, for example, you can add
+        10 to the amendment count of both China and the USA by typing in "China, USA" to the "Delegation Name"
+        field and then "10" in the "Change Amendments" field.
+            
+        Awesome, now we have a real committee! Let's say we just began our committee session and want to
+        take attendance. All we have to do is click on the "0" under the "Attended Sessions" column for
+        each country. Boom, attendance taken! You can already see the number of sessions each country
+        has participated in. This same process (which we call "QuickUp") can be used to 
+        update any of the other values on the table. Let's say the USA submitted a resolution. So, to
+        increase the number of resolutions, just click the "0" on the "Resolutions / Directives" column
+        and that will update to a "1".
+            
+        Let's say you think Angola submitted an amendment. Go ahead and use QuickUp to increase Angola's
+        amendments. Oh no! Turns out that the amendment was actually China's! So, to take away an
+        amendment from Angola, we can use the blue form on the bottom right (the same we used for
+        adding delegations to our committee! We should now type in "Angola" in the "Delegation Name"
+        field and "-1" on the "Amendments" field since we want to subtract one amendment. Click "Update"
+        and are mistake has been rectified! Note that if Angola (or any other delegation) were to 
+        eventually submit 10 amendments at one, we can just use this form to update the table just once
+        (instead of using QuickUp ten times). We can also change any of the other values on the table by
+        filling in the corresponding field on the form. Note you can update multiple fields at once
+        (but only a single delegation at a time) by typing in integers to each field on the form.
+        
+        Wondering what the "Committee Name" and "Committee Code" values represent? These will be used
+        for registering delegations so that delegates can communicate with you, the committee 
+        administrator via the crisis note functionality, which we'll talk about later on.
+            
+    Speaker Tracker
+        Now that we're done editing statistics in the committee, let's head over to the speaker tracker.
+        Just click the "SmartMUN" logo to go there! If at any time you want to return to the manager
+        page, simply click the gavel on the top right of the page. Anyway, back to our speaker tracker.
+        You should see a list of all your delegations with a number next to each. That shows you how
+        many times each delegation spoke (just like the "Speeches" column in the manager page) so that
+        you can ensure all members get an equal opportunity to speak. The more interesting part of this
+        page, however, is the right side - our speakers list!
+    
+        To add a speaker simply type their name in the "New Speaker" field and hit the "Add" button.
+        Note that a speech is automatically added to that speaker once he or her begins his speech,
+        (although you will only see this change if the page is refreshed), that is, when he or she
+        is the "Current Speaker". Keep in mind though that the speakers list clears when you refresh
+        the page, so we recommend refreshing only when the list is empty. The number of speeches on
+        the manager page will also be updated (since it is the same number). Feel free to add as many
+        speakers as you want to the list!
+
+        To start a delegation's speaking time, just put in the desired time (in seconds) and press
+        the "Start Timer" button. Note that the default speaking time is 45 seconds, but feel free
+        to change that at will. You can end a speaker's speaking time at any time by clicking the
+        "Next Speaker" button. This will make it so the next speaker in the list becomes the current
+        speaker and will start his or her time. To clear the speakers list, just hit the "Clear 
+        Speakers List" button. Note that the "speeches" information is only updated for a speaker
+        if they have spoken. So, if Venezuela is third on the list and the speakers list is cleared,
+        then Venezuela's speech amount will not have increased.
+            
+    Reset Password
+        Let's say you think you may have seen an overly excited delegate who wants to inflate his/her
+        stats see your password as you typed it in. You may want to change it and, to do that, simply
+        click on "Reset Password" on the top of the page. Type in your old password as a safety measure
+        and a new (different!) password. Be sure to confirm it (by retyping) and hit the "Reset" button.
+        If the form submits correctly and your password is reset, you'll see a green confirmation message.
+            
+    Crisis Notes
+        Let's head to the crisis page. Just click on "Crisis Notes" on the top of the page. You should
+        see a list of delegations in your committee and a "Committee Manager" (that's you!). 
+        Additionally, you should see a big white box, an input field and a "Send Message" button.
+        We're working to make it so that you can send and receive messages from delegates. We weren't
+        able to get this ready by the submission deadline, but hope to have it in place by the Harvard
+        MUN Conference (in late January). Once you switch to delegate mode (up next!) you will be able
+        to send messages to the committee manager and other delegates through the Crisis Notes page.
+    
+
+Delegate Mode
+    
+    Registering
+        Let's check out the delegate mode of our application. Before signing out, however, go back
+        to the committee manager page (remember: just click the gavel!) and take note of the 
+        "Committee Name" and "Committee Code" values we mentioned before. Now hit the "Log Out"
+        on the top right of the page. You should be redirected to the login page.
+
+        Now that you're on the login page, you may tempted to go ahead and login. Keep
+        in mind, however, that you still haven't registered any delegates for your commmittee,
+        so there's no delegate to login in with (yet)! Click the text to the right of the form (the one
+        that says "Register Here" (just like you did when registering a committee).
+
+        Be sure to click the checkbox about registering as a delegate. Now do you see why you needed
+        the "Committee Name" and "Committee Code" values? Insert these into the appropriate fields,
+        choose a delegation that you have in your committee, and think of a password. Note that if
+        you don't use a delegation in your committee then you will get an error message. Be sure to
+        type in the delegation name like it is on the committee manager (i.e. be type in "USA" instead
+        of "US" or "United States" since that is how you registered it in the committee manager).
+        Registering and logging in as a delegate is case-insensitive, so typing in "uSA", "Usa", etc
+        will all work. Logging in for committees, however, is case-sensitive (so capitalization matters).
+            
+    Logging in
+        After registering you will be redirected to the delegate log in page. Click the delegate
+        checkbox and log in with the necessary credentials. You'll see that you're now in the same
+        crisis page as you were when you were logged in as a committee. That's because we want to
+        empower delegates to communicate with you and other delegates in a quicker, easier, and
+        more environmentally friendly manner. Again, the implementation of this messaging system
+        is not complete (yet)!
+            
+This Was SmartMUN
+        
+    Thanks
+        Thank you for trying with SmartMUN. We hope you enjoyed your experience and use
+        SmartMUN to make chairing easier. If you have any questions or encouter any bugs please
+        do just shoot me an email at pedroluiscunhafarias@gmail.com!
