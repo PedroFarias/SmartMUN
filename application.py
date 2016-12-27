@@ -3,7 +3,8 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import gettempdir
-
+import os
+from flask_sqlalchemy import SQLAlchemy
 from helpers import *
 
 # configure application
@@ -25,8 +26,8 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # configure CS50 Library to use SQLite database
-db = SQL("sqlite:///smartmun.db")
-
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+db = SQLAlchemy(app)
 
 """Functions w/Database Alterations"""
 def updateReqs():
