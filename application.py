@@ -285,9 +285,9 @@ def register():
                 INTEGER DEFAULT 0, sessions INTEGER DEFAULT 0, hash \
                 TEXT)")
             
-    # redirect user to login page
-    conn.commit()
-    return redirect(url_for("login"))
+        # redirect user to login page
+        conn.commit()
+        return redirect(url_for("login"))
 
     # else if user reached route via GET (by clicking a link or via redirect)
     else:
