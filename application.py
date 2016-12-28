@@ -5,6 +5,7 @@ from passlib.apps import custom_app_context as pwd_context
 from tempfile import gettempdir
 import os
 import psycopg2
+import psycopg2.extras
 import urlparse
 #from flask_sqlalchemy import SQLAlchemy
 from helpers import *
