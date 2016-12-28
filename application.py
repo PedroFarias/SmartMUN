@@ -61,6 +61,7 @@ def updateDelInfo(column, value, table, delName, tableName):
     newVal = table[0][column] + value
     db.execute("UPDATE " + tableName + " SET %s = %s WHERE \
         delName = %s;", (column, newVal, delName))
+    conn.commit()
 
 """Routes"""
 @app.route("/", methods=["GET", "POST"])
@@ -98,6 +99,7 @@ def index():
     tableName = "comm{}".format(session["commCode"])
     db.execute("SELECT * FROM " + tableName + " ORDER BY delName;")
     delegations = db.fetchall()
+    conn.commit()
 
     return render_template("index.html", total=session["total"], 
         qualifiedMaj=session["qualifiedMaj"], simpleMaj=session["simpleMaj"],
@@ -163,6 +165,7 @@ def login():
             session["user_id"] = -1 * rows[0]["delId"]
             
             # redirect user to crisis page
+            conn.commit()
             return redirect(url_for("crisis"))
         
         # logging in as a committee manager
@@ -181,6 +184,7 @@ def login():
             session["commCode"] = session["user_id"]
 
             # redirect user to home page
+            conn.commit()
             return redirect(url_for("manager"))
 
     # else if user reached route via GET (as by clicking a link or via redirect)
@@ -255,9 +259,6 @@ def register():
                 (pwd_context.encrypt(request.form["password"]),
 		request.form.get("username").upper()))
                 
-            # redirect user to login page
-            return redirect(url_for("login"))
-        
         # logging in as a committee manager
         else:
             # query database for username
@@ -284,9 +285,9 @@ def register():
                 INTEGER DEFAULT 0, sessions INTEGER DEFAULT 0, hash \
                 TEXT)")
             
-        # redirect user to login page
-        conn.commit()
-        return redirect(url_for("login"))
+    # redirect user to login page
+    conn.commit()
+    return redirect(url_for("login"))
 
     # else if user reached route via GET (by clicking a link or via redirect)
     else:
@@ -349,6 +350,7 @@ def resetpass():
                 session["user_id"]))
         
         success = "Password modified successfully!"
+        conn.commit()
         return render_template("resetpass.html", success=success)
     else:
         return render_template("resetpass.html")
@@ -446,7 +448,7 @@ def manager():
                     error="The input for sessions must be an integer.")
     
     # prepare to render template
-    db.execute("SELECT * FROM %s ORDER BY delName ASC;", 
+    db.execute("SELECT * FROM " + tableName + " ORDER BY delName ASC;", 
         (tableName,))
     delegations = db.fetchall()
     db.execute("SELECT * FROM users WHERE id = %s;",
@@ -454,7 +456,7 @@ def manager():
     table = db.fetchall()
     commName = table[0]["username"]
     updateReqs()
-
+    conn.commit()
     return render_template("manager.html", total=session["total"], 
         qualifiedMaj=session["qualifiedMaj"], simpleMaj=session["simpleMaj"],
         fifthComm=session["fifthComm"], delegations=delegations, 
@@ -469,6 +471,7 @@ def crisis():
     tableName = "comm{}".format(session["commCode"])
     db.execute("SELECT * FROM " + tableName + " ORDER BY delName ASC;")
     delegations = db.fetchall()
+    conn.commit()
     return render_template("crisis.html", delegations=delegations)
     
 @app.route("/quickup", methods=["GET", "POST"])
@@ -507,7 +510,8 @@ def quickup():
     table = db.fetchall()
     commName = table[0]["username"]
     updateReqs()  
-    
+    conn.commit()
+
     # render template
     return render_template("manager.html", total=session["total"], 
         qualifiedMaj=session["qualifiedMaj"], simpleMaj=session["simpleMaj"],
