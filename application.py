@@ -1,9 +1,11 @@
-from cs50 import SQL
+#from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import gettempdir
 import os
+import psycopg2
+import urlparse
 from flask_sqlalchemy import SQLAlchemy
 from helpers import *
 
@@ -26,16 +28,25 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # configure CS50 Library to use SQLite database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-db = SQLAlchemy(app)
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+#db = SQLAlchemy(app)
+urlparse.uses_netloc.append("postgres")
+url = urlparse.urlparse(os.environ["DATABASE_URL"])
+sonn = psycopg2.connect(
+    database=url.path[1:],
+    user=url.username,
+    password=url.password,
+    host=url.hostname,
+    port=url.port)
+
+db = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
 """Functions w/Database Alterations"""
 def updateReqs():
     """ Updates statistics about committee"""
     
-    table = db.execute("SELECT members FROM users WHERE id = :id",
-            id=session["user_id"])
-
+    db.execute("SELECT members FROM users WHERE id = %s;",(session["user_id"],))
+		table = db.fetchall()
     # update values
     session["total"] = int(table[0]["members"])
     session["qualifiedMaj"] = int(session["total"] * 2/3)
@@ -47,9 +58,9 @@ def updateDelInfo(column, value, table, delName, tableName):
     """ Updates one of the stats about a delegation's participation"""
     
     newVal = table[0][column] + value
-    db.execute("UPDATE :name SET :column = :newVal WHERE \
-        delName = :delName", name=tableName, newVal=newVal,
-        delName=delName, column=column)
+    db.execute("UPDATE %s SET %s = %s WHERE \
+        delName = %s;", (tableName, column, newVal,
+        delName))
 
 """Routes"""
 @app.route("/", methods=["GET", "POST"])
@@ -66,9 +77,11 @@ def index():
         
         # ensure delegation is in committee
         tableName = "comm{}".format(session["commCode"])
-        table = db.execute("SELECT * FROM :name WHERE delName = :delName",
-            name=tableName, delName=request.form.get("delName"))
-        if len(table) == 0:
+        db.execute("SELECT * FROM %s WHERE delName = %s;",
+            (tableName, request.form.get("delName")))
+        table = db.fetchall()
+
+				if len(table) == 0:
             return render_template("error.html", 
                 error="This delegation must first be added to the committee.")
         
@@ -78,13 +91,15 @@ def index():
     
     # prepare to render
     updateReqs()
-    table = db.execute("SELECT * FROM users WHERE id = :id",
-        id=session["commCode"])
+    db.execute("SELECT * FROM users WHERE id = %s;",
+        (session["commCode"],))
+		table = db.fetchall()
     commName = table[0]["username"]
     tableName = "comm{}".format(session["commCode"])
-    delegations = db.execute("SELECT * FROM :name ORDER BY delName",
-        name=tableName)
-    
+    db.execute("SELECT * FROM %s ORDER BY delName",
+        (tableName,))
+		delegations = db.fetchall()
+
     return render_template("index.html", total=session["total"], 
         qualifiedMaj=session["qualifiedMaj"], simpleMaj=session["simpleMaj"],
         fifthComm=session["fifthComm"], delegations=delegations, 
@@ -118,9 +133,9 @@ def login():
                     error="Please provide the committee code.")
                     
             # check if committee code and name match
-            rows = db.execute("SELECT username FROM users WHERE id = :id",
-                id=request.form.get("commCode"))
-                
+            db.execute("SELECT username FROM users WHERE id = %s;",
+                (request.form.get("commCode"),))
+            rows = db.fetchall()
             # ensure committee was registered    
             if len(rows) != 1:
                 return render_template("error.html", 
@@ -131,10 +146,9 @@ def login():
 
             # query database for username
             tableName = "comm{}".format(request.form.get("commCode"))
-            rows = db.execute("SELECT * FROM :tableName WHERE delName = :username",
-                tableName=tableName, 
-                username=request.form.get("username").upper())
-                
+            db.execute("SELECT * FROM %s WHERE delName = %s;",
+                (tableName, request.form.get("username").upper()))
+            rows = db.fetchall()
             # ensure username exists and password is correct
             if rows[0]["hash"] is None:
                 return render_template("error.html", 
@@ -154,9 +168,9 @@ def login():
         
         # logging in as a committee manager
         else:
-            rows = db.execute("SELECT * FROM users WHERE username = :username",
-                username=request.form.get("username"))
-                
+            db.execute("SELECT * FROM users WHERE username = %s",
+                (request.form.get("username"),))
+            rows = db.fetchall()
             # ensure username exists and password is correct
             if len(rows) != 1 or not pwd_context.verify(request.form.get("password"),
                 rows[0]["hash"]):
@@ -216,9 +230,10 @@ def register():
                     error="Committee code cannot be blank.")
                 
             # check if committee code and name match
-            rows = db.execute("SELECT username FROM users WHERE id = :id",
-                id=request.form.get("commCode"))
-            if len(rows) != 1:
+            db.execute("SELECT username FROM users WHERE id = :id;",
+               (request.form.get("commCode"),))
+            rows = db.fetchall()
+						if len(rows) != 1:
                 return render_template("error.html", 
                     error="Committee not found.")
                 
@@ -228,20 +243,18 @@ def register():
 
             # query database for username
             tableName = "comm{}".format(request.form.get("commCode"))
-            rows = db.execute("SELECT * FROM :tableName WHERE delName = :username",
-                tableName=tableName, 
-                username=request.form.get("username").upper())
-                
+            db.execute("SELECT * FROM %s WHERE delName = %s;",
+                (tableName, request.form.get("username").upper()))
+            rows = db.fetchall()
             # check if username has already been taken
             if not rows[0]["hash"] is None:
                 return render_template("error.html", 
                     error="This delegation has already been registered.")
     
             # register user w/hashed password
-            db.execute("UPDATE :tableName SET hash=:hash WHERE delName = :username", 
-                username=request.form.get("username").upper(), 
-                tableName=tableName,
-                hash=pwd_context.encrypt(request.form["password"]))
+            db.execute("UPDATE %s SET hash = %s WHERE delName = %s;", 
+                (tableName, pwd_context.encrypt(request.form["password"]),
+		request.form.get("username").upper()))
                 
             # redirect user to login page
             return redirect(url_for("login"))
@@ -249,28 +262,29 @@ def register():
         # logging in as a committee manager
         else:
             # query database for username
-            rows = db.execute("SELECT * FROM users WHERE username = :username", 
-                username=request.form.get("username"))
-    
+            db.execute("SELECT * FROM users WHERE username = %s;", 
+                (request.form.get("username"),))
+    				rows = db.fetchall()
+
             # check if username has already been taken
             if len(rows) != 0:
                 return render_template("error.html", 
                     error="This username has already been taken, please choose another.")
     
             # register user w/hashed password
-            db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", 
-                username=request.form["username"],
-                hash=pwd_context.encrypt(request.form["password"]))
+            db.execute("INSERT INTO users (username, hash) VALUES (%s, %s);", 
+                (request.form["username"], pwd_context.encrypt(request.form["password"])))
             
             # create committee table
-            rows = db.execute("SELECT id FROM users WHERE :username = username",
-                username=request.form["username"])
+            db.execute("SELECT id FROM users WHERE username = %s;",
+                (request.form["username"],))
+						rows = db.fetchall()
             tableName = "comm{}".format(rows[0]["id"])
-            db.execute("CREATE TABLE :name ('delId' INTEGER PRIMARY KEY \
+            db.execute("CREATE TABLE %s ('delId' INTEGER PRIMARY KEY \
                 AUTOINCREMENT NOT NULL, 'delName' TEXT NOT NULL, 'speeches' \
                 INTEGER DEFAULT 0, 'resos' INTEGER DEFAULT 0,'amendments' \
                 INTEGERS DEFAULT 0, 'sessions' INTEGER DEFAULT 0, 'hash' \
-                TEXT)", name=tableName)
+                TEXT)", (tableName,))
             
         # redirect user to login page
         return redirect(url_for("login"))
@@ -300,13 +314,15 @@ def resetpass():
         # delegate logged in
         if session["user_id"] < 0:
             tableName = "comm{}".format(commCode)
-            currentPass = db.execute("SELECT hash FROM :tableName WHERE delId = :id",
-                tableName=tableName, id=-1*session["user_id"])
-        # committee logged in
+            db.execute("SELECT hash FROM %s WHERE delId = %s;",
+                (tableName, -1*session["user_id"]))
+        		currentPass = db.fetchall()
+				# committee logged in
         else:
-            currentPass = db.execute("SELECT hash FROM users WHERE id = :id",
-                id=session["user_id"])
-        
+            db.execute("SELECT hash FROM users WHERE id = %s;",
+                (session["user_id"],))
+        		currentPass = db.fetchall()
+
         # ensure password is correct
         if not pwd_context.verify(request.form.get("oldPass"), 
             currentPass[0]["hash"]):
@@ -324,14 +340,14 @@ def resetpass():
         # delegate logged in
         if session["user_id"] < 0:
             tableName = "comm{}".format(commCode)
-            db.execute("UPDATE :tableName SET hash = :hash WHERE delId = :id",
-                hash=pwd_context.encrypt(request.form["newPass"]), 
-                id=-1*session["user_id"], tableName=tableName)
+            db.execute("UPDATE %s SET hash = %s WHERE delId = %s;",
+                (tableName, pwd_context.encrypt(request.form["newPass"]), 
+                -1*session["user_id"]))
         # update password: committee logged in
         else:
-            db.execute("UPDATE users SET hash = :hash WHERE id = :id",
-                hash=pwd_context.encrypt(request.form["newPass"]), 
-                id=session["user_id"])
+            db.execute("UPDATE users SET hash = %s WHERE id = %s;",
+                (pwd_context.encrypt(request.form["newPass"]), 
+                session["user_id"]))
         
         success = "Password modified successfully!"
         return render_template("resetpass.html", success=success)
@@ -345,7 +361,8 @@ def manager():
     
     # update info
     tableName = "comm{}".format(session["commCode"])
-    delegations = db.execute("SELECT * FROM :name", name=tableName)
+    db.execute("SELECT * FROM %s", (tableName,))
+		delegations = db.fetchall()
 
     if request.method == "POST":
         # check if already in committee
@@ -362,9 +379,10 @@ def manager():
         
         #  check operation for each country
         for delName in dels:
-            table = db.execute("SELECT * FROM :name WHERE delName = :delName",
-                name=tableName, delName=delName)
-                
+            db.execute("SELECT * FROM %s WHERE delName = %s;",
+                (tableName, delName))
+            table = db.fetchall()
+    
             # attempted to add the delegation already in committee
             if len(table) != 0 and (not request.form.get("resos")) and \
                 (not request.form.get("amendments")) and \
@@ -383,21 +401,21 @@ def manager():
             
             # add member if necessary
             if len(table) == 0:
-                db.execute("INSERT INTO :name (delName) VALUES (:delName)", 
-                    name=tableName, delName=delName)
-                table = db.execute("SELECT * FROM :name", name=tableName)
+                db.execute("INSERT INTO %s (delName) VALUES (%s);", 
+                    (tableName, delName))
+                table = db.execute("SELECT * FROM %s;", (tableName))
                 newMem = len(table)
-                db.execute("UPDATE users SET members = :newMem WHERE id = :id",
-                    newMem=newMem,id=session["user_id"])
+                db.execute("UPDATE users SET members = %s WHERE id = %s;",
+                    (newMem, session["user_id"]))
     
             # delete member if necessary     
             if delete:
-                db.execute("DELETE FROM :name WHERE delName = :delName",
-                    name=tableName, delName=delName)
-                table = db.execute("SELECT * FROM :name", name=tableName)
+                db.execute("DELETE FROM %s WHERE delName = %s;",
+                    (tableName, delName))
+                table = db.execute("SELECT * FROM %s", (tableName,))
                 newMem = len(table)
-                db.execute("UPDATE users SET members = :newMem WHERE id = :id",
-                    newMem=newMem, id=session["user_id"])
+                db.execute("UPDATE users SET members = %s WHERE id = %s;",
+                    (newMem, session["user_id"]))
                     
             # update resolution information if necessary
             if isInt(request.form.get("resos")):
@@ -429,11 +447,13 @@ def manager():
                     error="The input for sessions must be an integer.")
     
     # prepare to render template
-    delegations = db.execute("SELECT * FROM :name ORDER BY delName ASC", 
-        name=tableName)
-    table = db.execute("SELECT * FROM users WHERE id = :id",
-        id=session["user_id"])
-    commName = table[0]["username"]
+    db.execute("SELECT * FROM %s ORDER BY delName ASC;", 
+        (tableName,))
+		delegations = db.fetchall()
+    db.execute("SELECT * FROM users WHERE id = %s;",
+        (session["user_id"],))
+    table = db.fetchall()
+		commName = table[0]["username"]
     updateReqs()
 
     return render_template("manager.html", total=session["total"], 
@@ -448,8 +468,9 @@ def crisis():
     
     # prepate to render template
     tableName = "comm{}".format(session["commCode"])
-    delegations = db.execute("SELECT * FROM :name ORDER BY delName ASC",
-        name=tableName)
+    db.execute("SELECT * FROM %s ORDER BY delName ASC;",
+        (tableName),)
+		delegations = db.fetchall()
     return render_template("crisis.html", delegations=delegations)
     
 @app.route("/quickup", methods=["GET", "POST"])
@@ -463,9 +484,10 @@ def quickup():
     curVal = request.args.get("curVal")
     up = int(request.args.get("up"))
     tableName = "comm{}".format(session["commCode"])
-    table = db.execute("SELECT * FROM :name WHERE delName = :delName",
-            name=tableName, delName=delName)
-    
+    db.execute("SELECT * FROM %s WHERE delName = %s;",
+            (tableName, delName))
+    table = db.fetchall()
+
     # update sessions
     if info == "sessions":
         updateDelInfo("sessions", up, table, delName, tableName)
@@ -480,11 +502,13 @@ def quickup():
         updateDelInfo("speeches", up, table, delName, tableName)
 
     # prepare to render template
-    delegations = db.execute("SELECT * FROM :name ORDER BY delName ASC",
-        name=tableName)
-    table = db.execute("SELECT * FROM users WHERE id = :id",
-        id=session["user_id"])
-    commName = table[0]["username"]
+    db.execute("SELECT * FROM %s ORDER BY delName ASC;",
+        (tableName,))
+    delegations = db.fetchall()
+		db.execute("SELECT * FROM users WHERE id = %s",
+        (session["user_id"],))
+    table = db.fetchall()
+		commName = table[0]["username"]
     updateReqs()  
     
     # render template
