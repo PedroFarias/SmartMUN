@@ -263,8 +263,7 @@ def register():
         # logging in as a committee manager
         else:
             # query database for username
-            db.execute("SELECT * FROM users WHERE username = %s;", 
-                (request.form.get("username"),))
+            db.execute("SELECT * FROM users WHERE username = %s;", (request.form.get("username"),))
             rows = db.fetchall()
 
             # check if username has already been taken
