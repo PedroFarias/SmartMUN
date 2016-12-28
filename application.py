@@ -283,7 +283,7 @@ def register():
             db.execute("CREATE TABLE " + tableName + " (delId serial PRIMARY KEY \
                 NOT NULL, delName text NOT NULL, speeches \
                 INTEGER DEFAULT 0, resos INTEGER DEFAULT 0, amendments \
-                INTEGERS DEFAULT 0, sessions INTEGER DEFAULT 0, hash \
+                INTEGER DEFAULT 0, sessions INTEGER DEFAULT 0, hash \
                 TEXT)")
             
         # redirect user to login page
