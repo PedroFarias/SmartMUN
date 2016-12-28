@@ -233,7 +233,7 @@ def register():
             db.execute("SELECT username FROM users WHERE id = :id;",
                (request.form.get("commCode"),))
             rows = db.fetchall()
-	    if len(rows) != 1:
+            if len(rows) != 1:
                 return render_template("error.html", 
                     error="Committee not found.")
                 
@@ -264,7 +264,7 @@ def register():
             # query database for username
             db.execute("SELECT * FROM users WHERE username = %s;", 
                 (request.form.get("username"),))
-    				rows = db.fetchall()
+            rows = db.fetchall()
 
             # check if username has already been taken
             if len(rows) != 0:
@@ -278,7 +278,7 @@ def register():
             # create committee table
             db.execute("SELECT id FROM users WHERE username = %s;",
                 (request.form["username"],))
-	    rows = db.fetchall()
+            rows = db.fetchall()
             tableName = "comm{}".format(rows[0]["id"])
             db.execute("CREATE TABLE %s ('delId' INTEGER PRIMARY KEY \
                 AUTOINCREMENT NOT NULL, 'delName' TEXT NOT NULL, 'speeches' \
@@ -317,7 +317,7 @@ def resetpass():
             db.execute("SELECT hash FROM %s WHERE delId = %s;",
                 (tableName, -1*session["user_id"]))
             currentPass = db.fetchall()
-	# committee logged in
+        # committee logged in
         else:
             db.execute("SELECT hash FROM users WHERE id = %s;",
                 (session["user_id"],))
@@ -362,7 +362,7 @@ def manager():
     # update info
     tableName = "comm{}".format(session["commCode"])
     db.execute("SELECT * FROM %s", (tableName,))
-		delegations = db.fetchall()
+    delegations = db.fetchall()
 
     if request.method == "POST":
         # check if already in committee
@@ -449,7 +449,7 @@ def manager():
     # prepare to render template
     db.execute("SELECT * FROM %s ORDER BY delName ASC;", 
         (tableName,))
-		delegations = db.fetchall()
+    delegations = db.fetchall()
     db.execute("SELECT * FROM users WHERE id = %s;",
         (session["user_id"],))
     table = db.fetchall()
@@ -505,7 +505,7 @@ def quickup():
     db.execute("SELECT * FROM %s ORDER BY delName ASC;",
         (tableName,))
     delegations = db.fetchall()
-		db.execute("SELECT * FROM users WHERE id = %s",
+    db.execute("SELECT * FROM users WHERE id = %s",
         (session["user_id"],))
     table = db.fetchall()
     commName = table[0]["username"]
