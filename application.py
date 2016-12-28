@@ -280,6 +280,7 @@ def register():
                 (request.form["username"],))
             rows = db.fetchall()
             tableName = "comm{}".format(rows[0]["id"])
+            print(tableName)
             db.execute("CREATE TABLE %s (delId serial PRIMARY KEY \
                 NOT NULL, delName text NOT NULL, speeches \
                 INTEGER DEFAULT 0, resos INTEGER DEFAULT 0, amendments \
