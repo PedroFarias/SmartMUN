@@ -32,7 +32,7 @@ Session(app)
 #db = SQLAlchemy(app)
 urlparse.uses_netloc.append("postgres")
 url = urlparse.urlparse(os.environ["DATABASE_URL"])
-sonn = psycopg2.connect(
+conn = psycopg2.connect(
     database=url.path[1:],
     user=url.username,
     password=url.password,
