@@ -285,6 +285,7 @@ def register():
                 TEXT)")
             
         # redirect user to login page
+        conn.commit()
         return redirect(url_for("login"))
 
     # else if user reached route via GET (by clicking a link or via redirect)
@@ -512,5 +513,3 @@ def quickup():
         qualifiedMaj=session["qualifiedMaj"], simpleMaj=session["simpleMaj"],
         fifthComm=session["fifthComm"], delegations=delegations, 
         commCode=session["user_id"], commName=commName)
-
-conn.commit()
