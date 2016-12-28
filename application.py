@@ -404,7 +404,8 @@ def manager():
             if len(table) == 0:
                 db.execute("INSERT INTO " + tableName + " (delName) VALUES (%s);", 
                     (delName,))
-                table = db.execute("SELECT * FROM " + tableName + ";")
+                db.execute("SELECT * FROM " + tableName + ";")
+                table = db.fetchall()
                 newMem = len(table)
                 db.execute("UPDATE users SET members = %s WHERE id = %s;",
                     (newMem, session["user_id"]))
@@ -413,7 +414,8 @@ def manager():
             if delete:
                 db.execute("DELETE FROM " + tableName + " WHERE delName = %s;",
                     (delName,))
-                table = db.execute("SELECT * FROM " + tableName + ";")
+                db.execute("SELECT * FROM " + tableName + ";")
+                table = db.fetchall()
                 newMem = len(table)
                 db.execute("UPDATE users SET members = %s WHERE id = %s;",
                     (newMem, session["user_id"]))
