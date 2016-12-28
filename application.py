@@ -233,7 +233,7 @@ def register():
             db.execute("SELECT username FROM users WHERE id = :id;",
                (request.form.get("commCode"),))
             rows = db.fetchall()
-						if len(rows) != 1:
+	    if len(rows) != 1:
                 return render_template("error.html", 
                     error="Committee not found.")
                 
@@ -278,7 +278,7 @@ def register():
             # create committee table
             db.execute("SELECT id FROM users WHERE username = %s;",
                 (request.form["username"],))
-						rows = db.fetchall()
+	    rows = db.fetchall()
             tableName = "comm{}".format(rows[0]["id"])
             db.execute("CREATE TABLE %s ('delId' INTEGER PRIMARY KEY \
                 AUTOINCREMENT NOT NULL, 'delName' TEXT NOT NULL, 'speeches' \
@@ -316,12 +316,12 @@ def resetpass():
             tableName = "comm{}".format(commCode)
             db.execute("SELECT hash FROM %s WHERE delId = %s;",
                 (tableName, -1*session["user_id"]))
-        		currentPass = db.fetchall()
-				# committee logged in
+            currentPass = db.fetchall()
+	# committee logged in
         else:
             db.execute("SELECT hash FROM users WHERE id = %s;",
                 (session["user_id"],))
-        		currentPass = db.fetchall()
+            currentPass = db.fetchall()
 
         # ensure password is correct
         if not pwd_context.verify(request.form.get("oldPass"), 
@@ -453,7 +453,7 @@ def manager():
     db.execute("SELECT * FROM users WHERE id = %s;",
         (session["user_id"],))
     table = db.fetchall()
-		commName = table[0]["username"]
+    commName = table[0]["username"]
     updateReqs()
 
     return render_template("manager.html", total=session["total"], 
@@ -470,7 +470,7 @@ def crisis():
     tableName = "comm{}".format(session["commCode"])
     db.execute("SELECT * FROM %s ORDER BY delName ASC;",
         (tableName),)
-		delegations = db.fetchall()
+    delegations = db.fetchall()
     return render_template("crisis.html", delegations=delegations)
     
 @app.route("/quickup", methods=["GET", "POST"])
@@ -508,7 +508,7 @@ def quickup():
 		db.execute("SELECT * FROM users WHERE id = %s",
         (session["user_id"],))
     table = db.fetchall()
-		commName = table[0]["username"]
+    commName = table[0]["username"]
     updateReqs()  
     
     # render template
