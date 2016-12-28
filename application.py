@@ -280,10 +280,10 @@ def register():
                 (request.form["username"],))
             rows = db.fetchall()
             tableName = "comm{}".format(rows[0]["id"])
-            db.execute("CREATE TABLE %s ('delId' INTEGER PRIMARY KEY \
-                AUTOINCREMENT NOT NULL, 'delName' TEXT NOT NULL, 'speeches' \
-                INTEGER DEFAULT 0, 'resos' INTEGER DEFAULT 0,'amendments' \
-                INTEGERS DEFAULT 0, 'sessions' INTEGER DEFAULT 0, 'hash' \
+            db.execute("CREATE TABLE %s (delId serial PRIMARY KEY \
+                NOT NULL, delName text NOT NULL, speeches \
+                INTEGER DEFAULT 0, resos INTEGER DEFAULT 0, amendments \
+                INTEGERS DEFAULT 0, sessions INTEGER DEFAULT 0, hash \
                 TEXT)", (tableName,))
             
         # redirect user to login page
