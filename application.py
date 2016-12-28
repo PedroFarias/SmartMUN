@@ -81,7 +81,7 @@ def index():
             (tableName, request.form.get("delName")))
         table = db.fetchall()
 
-				if len(table) == 0:
+	if len(table) == 0:
             return render_template("error.html", 
                 error="This delegation must first be added to the committee.")
         
@@ -93,12 +93,12 @@ def index():
     updateReqs()
     db.execute("SELECT * FROM users WHERE id = %s;",
         (session["commCode"],))
-		table = db.fetchall()
+    table = db.fetchall()
     commName = table[0]["username"]
     tableName = "comm{}".format(session["commCode"])
     db.execute("SELECT * FROM %s ORDER BY delName",
         (tableName,))
-		delegations = db.fetchall()
+    delegations = db.fetchall()
 
     return render_template("index.html", total=session["total"], 
         qualifiedMaj=session["qualifiedMaj"], simpleMaj=session["simpleMaj"],
