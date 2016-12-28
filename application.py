@@ -6,7 +6,7 @@ from tempfile import gettempdir
 import os
 import psycopg2
 import urlparse
-from flask_sqlalchemy import SQLAlchemy
+#from flask_sqlalchemy import SQLAlchemy
 from helpers import *
 
 # configure application
