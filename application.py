@@ -46,7 +46,7 @@ def updateReqs():
     """ Updates statistics about committee"""
     
     db.execute("SELECT members FROM users WHERE id = %s;",(session["user_id"],))
-		table = db.fetchall()
+    table = db.fetchall()
     # update values
     session["total"] = int(table[0]["members"])
     session["qualifiedMaj"] = int(session["total"] * 2/3)
