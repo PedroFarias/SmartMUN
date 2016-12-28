@@ -512,3 +512,5 @@ def quickup():
         qualifiedMaj=session["qualifiedMaj"], simpleMaj=session["simpleMaj"],
         fifthComm=session["fifthComm"], delegations=delegations, 
         commCode=session["user_id"], commName=commName)
+
+conn.commit()
