@@ -46,7 +46,7 @@ db = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 def updateReqs():
     """ Updates statistics about committee"""
     
-    db.execute("SELECT members FROM users WHERE id = %s;",(session["user_id"],))
+    db.execute("SELECT members FROM users WHERE id = %s;", (session["user_id"],))
     table = db.fetchall()
     # update values
     session["total"] = int(table[0]["members"])
@@ -471,6 +471,7 @@ def crisis():
     
     # prepate to render template
     tableName = "comm{}".format(session["commCode"])
+    print(tableName)
     db.execute("SELECT * FROM " + tableName + " ORDER BY delName ASC;")
     delegations = db.fetchall()
     conn.commit()
