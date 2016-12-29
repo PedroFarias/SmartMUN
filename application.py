@@ -339,7 +339,7 @@ def resetpass():
 
         # delegate logged in
         if session["user_id"] < 0:
-            tableName = "comm{}".format(commCode)
+            tableName = "comm{}".format(session["commCode"])
             db.execute("UPDATE " + tableName + " SET hash = %s WHERE delid = %s;",
                 (pwd_context.encrypt(request.form["newPass"]), 
                 -1*session["user_id"]))
