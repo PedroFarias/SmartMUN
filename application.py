@@ -450,7 +450,7 @@ def manager():
                     error="The input for sessions must be an integer.")
     
     # prepare to render template
-    db.execute("SELECT * FROM " + tableName + " ORDER BY delName ASC;")
+    db.execute("SELECT * FROM " + tableName + " ORDER BY delname ASC;")
     delegations = db.fetchall()
     db.execute("SELECT * FROM users WHERE id = %s;",
         (session["user_id"],))
