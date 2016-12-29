@@ -313,7 +313,7 @@ def resetpass():
         
         # delegate logged in
         if session["user_id"] < 0:
-            tableName = "comm{}".format(commCode)
+            tableName = "comm{}".format(session["commCode"])
             db.execute("SELECT hash FROM " + tableName + " WHERE delid = %s;",
                 (-1*session["user_id"],))
             currentPass = db.fetchall()
