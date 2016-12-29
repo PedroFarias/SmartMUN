@@ -59,8 +59,8 @@ def updateDelInfo(column, value, table, delName, tableName):
     """ Updates one of the stats about a delegation's participation"""
     
     newVal = table[0][column] + value
-    db.execute("UPDATE " + tableName + " SET %s = %s WHERE \
-        delname = %s;", (column, newVal, delName))
+    db.execute("UPDATE " + tableName + " SET " + column + " = %s WHERE \
+        delname = %s;", (newVal, delName))
     conn.commit()
 
 """Routes"""
