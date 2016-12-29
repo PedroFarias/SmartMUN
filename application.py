@@ -1,4 +1,3 @@
-#from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
@@ -7,7 +6,6 @@ import os
 import psycopg2
 import psycopg2.extras
 import urlparse
-#from flask_sqlalchemy import SQLAlchemy
 from helpers import *
 
 # configure application
@@ -28,9 +26,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# configure CS50 Library to use SQLite database
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-#db = SQLAlchemy(app)
+# configure database connection
 urlparse.uses_netloc.append("postgres")
 url = urlparse.urlparse(os.environ["DATABASE_URL"])
 conn = psycopg2.connect(
