@@ -233,7 +233,7 @@ def register():
                     error="Committee code cannot be blank.")
                 
             # check if committee code and name match
-            db.execute("SELECT username FROM users WHERE id = :id;",
+            db.execute("SELECT username FROM users WHERE id = %s;",
                (request.form.get("commCode"),))
             rows = db.fetchall()
             if len(rows) != 1:
