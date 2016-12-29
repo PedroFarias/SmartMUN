@@ -504,8 +504,7 @@ def quickup():
         updateDelInfo("speeches", up, table, delName, tableName)
 
     # prepare to render template
-    db.execute("SELECT * FROM %s ORDER BY delname ASC;",
-        (tableName,))
+    db.execute("SELECT * FROM " + tableName + " ORDER BY delname ASC;")
     delegations = db.fetchall()
     db.execute("SELECT * FROM users WHERE id = %s",
         (session["user_id"],))
