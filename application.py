@@ -46,7 +46,8 @@ def updateReqs():
     table = db.fetchall()
     # update values
     session["total"] = int(table[0]["members"])
-    session["qualifiedMaj"] = int(session["total"] * 2/3)
+    session["qualifiedMaj"] = int((session["total"] * 2 / 3) + 1) if \
+        session["total"] != 0 else 0
     session["simpleMaj"] = int((session["total"] / 2) + 1) if \
         session["total"] != 0 else 0
     session["fifthComm"] = int(session["total"] / 5)
